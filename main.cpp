@@ -5,6 +5,7 @@ Data tested against Edge and Phone
  * 
 */
 #include <Arduino.h>
+#define ESP_PLATFORM
 #include <NimBLEDevice.h>
 
 bool notify = false;
