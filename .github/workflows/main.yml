@@ -17,4 +17,4 @@ jobs:
         uses: ArminJo/arduino-test-compile@master
         with:
           sketch-names: main.cpp
-          required-libraries: NimBLE
+          required-libraries: h2zero/NimBLE-Arduino
