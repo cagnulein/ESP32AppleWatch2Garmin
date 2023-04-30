@@ -9,11 +9,11 @@ Data tested against Edge and Phone
 #include <NimBLEDevice.h>
 
 bool notify = false;
-uint8 hrInstantaneous = 0;
+uint8_t HRInstantaneous = 0;
 
 // Define stuff for the Client that will receive data from Fitness Machine
 // The remote service we wish to connect to.
-static BLEUUID serviceUUID("1808"); // HR Service
+static BLEUUID serviceUUID("180D"); // HR Service
 // The characteristic of the remote service we are interested in.
 static BLEUUID charUUID("2a37"); // HR Measuremente
 
@@ -155,8 +155,8 @@ static void notifyCallback(
     size_t length,
     bool isNotify)
 {
-  hrInstantaneous = pData[1];
-  Serial.printf("HR = %d\n", hrInstantaneous);
+  HRInstantaneous = pData[1];
+  Serial.printf("HR = %d\n", HRInstantaneous);
 }
 
 /**  None of these are required as they will be handled by the library with defaults. **
@@ -282,6 +282,9 @@ long lastNotify = 0;
 
 void setup()
 {
+  //pinMode(2, OUTPUT);
+  //digitalWrite(13, LOW);
+
   Serial.begin(115200);
   Serial.println("Starting NimBLE Server");
   
@@ -289,14 +292,14 @@ void setup()
   slBuffer[1] = 0;
 
   /** sets device name */
-  NimBLEDevice::init("Yesoul_CP");
+  NimBLEDevice::init("GarminBR");
   /** Optional: set the transmit power, default is 3db */
   //NimBLEDevice::setPower(ESP_PWR_LVL_P9); /** +9db */
 
   pServer = NimBLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
 
-  NimBLEService *pDeadService = pServer->createService("1808");
+  NimBLEService *pDeadService = pServer->createService("180D");
   HRMeasurement = pDeadService->createCharacteristic(
       "2A37",
       NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
@@ -357,17 +360,15 @@ void loop()
   }
 
   if (millis() - lastNotify >= 1000) // do this every second
-  {
-    if (pServer->getConnectedCount() > 0)
+  { 
+    if (connected)
     {
       bleBuffer[0] = 0;
       bleBuffer[1] = HRInstantaneous & 0xff;
       HRMeasurement->setValue(bleBuffer, 2);
       HRMeasurement->notify();
+      lastNotify = millis();
+      Serial.println("Notifying");
     }
-  }
-  if (pServer->getConnectedCount() == 0)
-  {
-    powerInstantaneous = 0;
   }
 }
